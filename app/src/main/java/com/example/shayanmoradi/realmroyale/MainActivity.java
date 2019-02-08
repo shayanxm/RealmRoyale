@@ -3,6 +3,7 @@ package com.example.shayanmoradi.realmroyale;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,9 @@ import com.example.shayanmoradi.realmroyale.Model.Customer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
+import io.realm.Realm;
 
 public class MainActivity extends AppCompatActivity {
     private EditText nameEdit;
@@ -34,21 +38,33 @@ public class MainActivity extends AppCompatActivity {
     private CustomerAdapter customerAdapter;
     private Customer customer;
     private List<Car> custoemrCars;
-
+Realm realm =Realm.getDefaultInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         castView();
+        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
         registerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ////
                 //register new customer
-                String customerName = nameEdit.getText().toString();
-                int customerAge = Integer.valueOf(ageEdit.getText().toString());
-                Customer customer = new Customer();
+
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        String customerName = nameEdit.getText().toString();
+                        int customerAge = Integer.valueOf(ageEdit.getText().toString());
+                        UUID uuid= UUID.randomUUID();
+                        Customer customer=realm.createObject(Customer.class,uuid.toString());
+                        customer.setName(customerName);
+                        customer.setAge(customerAge);
+                        realm.copyToRealmOrUpdate(customer);
+                    }
+                });
 
             }
         });
@@ -58,8 +74,28 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ///
                 //buy new car
-                String carName = carNameEditText.getText().toString();
-                boolean isLuxary = isLuxaryCheck.isChecked();
+
+
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        String customerName= customerNameEdit.getText().toString();
+                        String carName = carNameEditText.getText().toString();
+                        boolean isLuxary = isLuxaryCheck.isChecked();
+                        Car   car=realm.createObject(Car.class);
+                        car.setOwnerName(customerName);
+                        car.setCarName(carName);
+                        car.setIsluxary(isLuxary);
+                        Customer customer= realm.where(Customer.class).
+                                equalTo("name",customerName).findFirst();
+                        customer.custoemrsCars.add(car);
+                        realm.copyToRealmOrUpdate(customer);
+
+
+
+
+                    }
+                });
             }
         });
         searchForCustomerBtn.setOnClickListener(new View.OnClickListener() {
@@ -71,6 +107,12 @@ public class MainActivity extends AppCompatActivity {
                 String customerNameForSearch = buyerNameSearchEdit.getText().toString();
                 boolean isLuxarForSearch = searchForLuxaryCheck.isChecked();
                 boolean descendingSort = descendingSearchCheck.isChecked();
+                Customer customer= realm.where(Customer.class).equalTo("name",customerNameForSearch).findFirst();
+                custoemrCars=customer.getCustoemrsCars();
+
+
+
+                updateUI();
             }
         });
     }
@@ -94,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void updateUI() {
         /////set cars
-        List<Car> cars = new ArrayList<>();
+        List<Car> cars =custoemrCars;
         /////
         if (customerAdapter == null) {
             customerAdapter = new CustomerAdapter(cars);
@@ -103,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
             customerAdapter.setCArs(cars);
             customerAdapter.notifyDataSetChanged();
         }
+        recyclerView.setAdapter(customerAdapter);
     }
 
     private class CustoemrHolder extends RecyclerView.ViewHolder {

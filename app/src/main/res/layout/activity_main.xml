@@ -101,14 +101,14 @@
                     android:id="@+id/search_for_luxary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="CheckBox"
+                    android:text="luxary"
                     tools:text="luxary" />
 
                 <CheckBox
                     android:id="@+id/descending_search"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="CheckBox"
+                    android:text="Descending"
                     tools:text="Descending" />
 
                 <Button

@@ -1,6 +1,10 @@
 package com.example.shayanmoradi.realmroyale.Model;
 
-public class Car {
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
+public class Car extends RealmObject {
+
     private String carName;
     private String ownerName;
     private boolean isluxary;

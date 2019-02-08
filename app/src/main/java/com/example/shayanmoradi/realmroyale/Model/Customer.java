@@ -2,16 +2,22 @@ package com.example.shayanmoradi.realmroyale.Model;
 
 import java.util.List;
 
-public class Customer {
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
+public class Customer extends RealmObject {
+    @PrimaryKey
+    private  String key;
     private String name;
     private int age;
-    private List<Car>custoemrsCars;
+    public RealmList<Car> custoemrsCars;
 
-    public List<Car> getCustoemrsCars() {
+    public RealmList<Car> getCustoemrsCars() {
         return custoemrsCars;
     }
 
-    public void setCustoemrsCars(List<Car> custoemrsCars) {
+    public void setCustoemrsCars(RealmList<Car> custoemrsCars) {
         this.custoemrsCars = custoemrsCars;
     }
 
